@@ -1,0 +1,9 @@
+[build]
+  functions = "netlify/functions"
+
+[[redirects]]
+  # Detta gör anropen snyggare om du vill, men är inget krav.
+  # Det gör att du kan anropa /api/analyze-stats istället för den långa sökvägen.
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200

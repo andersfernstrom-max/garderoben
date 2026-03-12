@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="sv">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hjälp - Garderoben</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary-color: #005595; /* VGR Blå */
+        --bg-color: #f3f4f6;
+        --card-bg: #ffffff;
+        --text-color: #1f2937;
+        --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        margin: 0;
+        padding: 20px;
+        line-height: 1.5;
+        display: flex;
+        justify-content: center;
+      }
+
+      .container {
+        max-width: 400px;
+        width: 100%;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+        margin-top: 20px;
+      }
+
+      .logo-text {
+        font-weight: 800;
+        font-size: 1.5rem;
+        color: var(--primary-color);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .card {
+        background: var(--card-bg);
+        padding: 25px;
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        margin-bottom: 20px;
+        border-left: 5px solid var(--primary-color);
+      }
+
+      h2 {
+        margin-top: 0;
+        font-size: 1.2rem;
+        color: var(--primary-color);
+      }
+
+      p {
+        margin-bottom: 0;
+        font-size: 0.95rem;
+        color: #4b5563;
+      }
+
+      .step-number {
+        display: inline-block;
+        background: var(--primary-color);
+        color: white;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 24px;
+        font-size: 0.8rem;
+        font-weight: bold;
+        margin-right: 8px;
+        vertical-align: middle;
+      }
+
+      .contact-box {
+        text-align: center;
+        margin-top: 40px;
+        padding: 20px;
+        background: #e0f2fe; /* Ljusblå */
+        border-radius: 12px;
+        border: 1px solid #bae6fd;
+      }
+
+      .btn-call {
+        display: inline-block;
+        background-color: var(--primary-color);
+        color: white;
+        text-decoration: none;
+        padding: 12px 25px;
+        border-radius: 50px;
+        font-weight: 600;
+        margin-top: 15px;
+        box-shadow: 0 4px 6px rgba(0, 85, 149, 0.3);
+        transition: transform 0.2s;
+      }
+
+      .btn-call:active {
+        transform: scale(0.95);
+      }
+
+      .footer {
+        text-align: center;
+        font-size: 0.75rem;
+        color: #9ca3af;
+        margin-top: 40px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo-text">Garderoben</div>
+        <p style="font-size: 0.9rem; margin-top: 5px">Drift & Support</p>
+      </div>
+
+      <div class="card">
+        <h2><span class="step-number">1</span>Är skärmen svart?</h2>
+        <p>
+          1. Tryck en gång på skärmen.<br />
+          2. Kontrollera att laddkabeln sitter i ordentligt (både i väggen och i
+          iPaden).
+        </p>
+      </div>
+
+      <div class="card">
+        <h2><span class="step-number">2</span>Har appen hängt sig?</h2>
+        <p>
+          Om du ser bilden men inte kan klicka på något, försök
+          <strong>inte</strong>
+          starta om iPaden själv då den är systemlåst.
+        </p>
+        <p style="margin-top: 10px; font-weight: 600">
+          Kontakta supporten nedan.
+        </p>
+      </div>
+
+      <div class="contact-box">
+        <h3 style="margin: 0; color: var(--primary-color)">
+          Behöver du hjälp?
+        </h3>
+        <p style="margin-top: 5px">Ring ansvarig på plats:</p>
+
+        <a href="tel:030398970" class="btn-call">📞 Ring Supporten</a>
+      </div>
+
+      <div class="footer">Miljöenheten SV &copy; 2026</div>
+    </div>
+  </body>
+</html>

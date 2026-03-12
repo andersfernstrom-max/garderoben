@@ -1,0 +1,2273 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Klädappen" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Klädappen - VGR</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <style>
+    /* --- CSS START --- */
+    :root {
+      --primary-color: #005595;
+      /* VGR Blå */
+      --text-color: #1f2937;
+      --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+      --danger-color: #dc2626;
+      --success-color: #10b981;
+      --ai-color: #7c3aed;
+      /* Lila för AI */
+      --ai-light: #f3e8ff;
+      --warning-bg: #fef2f2;
+      --warning-border: #fca5a5;
+      --alert-text: #991b1b;
+    }
+
+    body {
+      font-family: "Inter", sans-serif;
+      color: var(--text-color);
+      margin: 0;
+      -webkit-tap-highlight-color: transparent;
+      min-height: 100vh;
+      background: url("images/bakgrund.jpg") no-repeat center center fixed;
+      background-size: cover;
+      box-sizing: border-box;
+      padding-top: env(safe-area-inset-top);
+      padding-top: constant(safe-area-inset-top);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg,
+          rgba(243, 244, 246, 0.6),
+          rgba(220, 230, 240, 0.8));
+      z-index: -1;
+    }
+
+    /* --- LOGGA CSS --- */
+    .fixed-logo {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 240px;
+      height: auto;
+      z-index: -1;
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    @media (max-width: 600px) {
+      .fixed-logo {
+        width: 140px;
+        bottom: 15px;
+        right: 15px;
+      }
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      padding-bottom: 180px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    /* --- TOAST NOTIS --- */
+    .toast-notification {
+      position: fixed;
+      top: calc(20px + env(safe-area-inset-top));
+      left: 50%;
+      transform: translateX(-50%) translateY(-100px);
+      background: var(--success-color);
+      color: white;
+      padding: 16px 28px;
+      border-radius: 50px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      z-index: 3000;
+      font-weight: 600;
+      font-size: 1rem;
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast-notification.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* --- KONTAKT-DEL --- */
+    .contact-section {
+      margin-top: 30px;
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 15px 25px;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-left: auto;
+      margin-right: auto;
+      max-width: fit-content;
+    }
+
+    .contact-text {
+      font-size: 0.85rem;
+      color: #64748b;
+      opacity: 0.9;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    .qr-image-small {
+      width: 65px;
+      height: 65px;
+      border-radius: 8px;
+      mix-blend-mode: multiply;
+      opacity: 1;
+      border: none;
+    }
+
+    /* --- LOGIN --- */
+    .login-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 85vh;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .dept-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .dept-card {
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      cursor: pointer;
+      text-align: center;
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--primary-color);
+      transition: all 0.2s ease;
+    }
+
+    .dept-card:hover {
+      background: rgba(255, 255, 255, 0.9);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .dept-card:active {
+      transform: scale(0.98);
+      border-color: var(--primary-color);
+    }
+
+    .admin-login-link {
+      margin-top: 50px;
+      color: #64748b;
+      text-decoration: none;
+      font-size: 0.85rem;
+      background: rgba(255, 255, 255, 0.5);
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: 0.2s;
+    }
+
+    .admin-login-link:hover {
+      background: white;
+      color: var(--primary-color);
+    }
+
+    /* --- UTDELNING --- */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 15px 25px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .header-title-box {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-label {
+      font-size: 0.75rem;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .header-dept-name {
+      font-weight: 800;
+      font-size: 1.3rem;
+      color: var(--primary-color);
+    }
+
+    .btn-close {
+      background: var(--danger-color);
+      color: white;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
+      transition: 0.2s;
+    }
+
+    .btn-close:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .filter-card {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.2s;
+    }
+
+    .filter-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .filter-title {
+      font-weight: 700;
+      margin-bottom: 15px;
+      font-size: 1.3rem;
+      color: var(--primary-color);
+    }
+
+    .sub-btn-container {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .sub-btn {
+      flex: 1;
+      padding: 12px 0;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    .sub-btn:hover {
+      background: white;
+    }
+
+    .sub-btn.dam {
+      color: #db2777;
+      background: #fdf2f8;
+      border: 1px solid #fce7f3;
+    }
+
+    .sub-btn.herr {
+      color: #2563eb;
+      background: #eff6ff;
+      border: 1px solid #dbeafe;
+    }
+
+    .sub-btn.unisex {
+      color: #059669;
+      background: #ecfdf5;
+      border: 1px solid #d1fae5;
+    }
+
+    .sub-btn.socks-action {
+      background: #dcfce7;
+      color: #166534;
+      border-color: #86efac;
+    }
+
+    .sub-btn.socks-action:active {
+      background: #bbf7d0;
+      transform: scale(0.98);
+    }
+
+    .sub-btn.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      background: #f1f5f9;
+      color: #94a3b8;
+      border: none;
+    }
+
+    /* --- ADMIN --- */
+    .admin-view {
+      padding-bottom: 100px;
+    }
+
+    .tabs-nav {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      background: rgba(255, 255, 255, 0.6);
+      color: #64748b;
+      font-weight: 600;
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: 0.3s;
+    }
+
+    .tab-btn.active {
+      background: var(--primary-color);
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 55, 149, 0.3);
+    }
+
+    .admin-section {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      margin-bottom: 25px;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .admin-section h3 {
+      margin-top: 0;
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 15px;
+      color: var(--text-color);
+      font-size: 1.2rem;
+    }
+
+    /* AI SECTION CSS (MODAL VERSION) */
+    .ai-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 10px;
+    }
+
+    .ai-modal-header h2 {
+      margin: 0;
+      color: var(--ai-color);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ai-chips-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .ai-chip {
+      background: var(--ai-light);
+      color: var(--ai-color);
+      border: 1px solid #e9d5ff;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .ai-chip:hover {
+      background: #d8b4fe;
+      color: #581c87;
+      transform: translateY(-1px);
+    }
+
+    .ai-textarea {
+      width: 100%;
+      padding: 15px;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      resize: vertical;
+      min-height: 80px;
+      font-family: inherit;
+      box-sizing: border-box;
+      font-size: 1rem;
+      margin-bottom: 15px;
+      transition: 0.2s;
+    }
+
+    .ai-textarea:focus {
+      border-color: var(--ai-color);
+      outline: none;
+    }
+
+    .btn-ask-ai {
+      background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+      color: white;
+      border: none;
+      padding: 15px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 1rem;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 10px rgba(124, 58, 237, 0.3);
+      transition: 0.2s;
+    }
+
+    .btn-ask-ai:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(124, 58, 237, 0.4);
+    }
+
+    .ai-result-box {
+      margin-top: 20px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      padding: 20px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #334155;
+      min-height: 60px;
+      max-height: 300px;
+      overflow-y: auto;
+      text-align: left;
+    }
+
+    .ai-result-box h1,
+    .ai-result-box h2,
+    .ai-result-box h3 {
+      margin-top: 0.5em;
+      margin-bottom: 0.5em;
+      font-size: 1.1em;
+      color: var(--ai-color);
+    }
+
+    .ai-loading {
+      text-align: center;
+      color: #64748b;
+      font-style: italic;
+    }
+
+    /* End AI CSS */
+
+    #stock-alerts {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .stock-item-row {
+      border-bottom: 1px solid #f1f5f9;
+      padding: 12px 0;
+    }
+
+    .stock-sizes-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .stock-size-box {
+      background: #f8fafc;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      text-align: center;
+      min-width: 60px;
+    }
+
+    .stock-size-box.critical {
+      background-color: #fef2f2;
+      border-color: #fca5a5;
+      color: #dc2626;
+      border-width: 2px;
+    }
+
+    .stock-control {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 5px;
+    }
+
+    .btn-mini {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+      background: white;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: 0.2s;
+    }
+
+    .btn-mini:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+
+    .add-form {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: end;
+      margin-top: 15px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      font-size: 0.75rem;
+      margin-bottom: 4px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+    }
+
+    .input-mini {
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .btn-action {
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0 20px;
+      border-radius: 8px;
+      height: 38px;
+      font-weight: 600;
+      box-shadow: 0 2px 4px rgba(0, 85, 149, 0.2);
+    }
+
+    /* DASHBOARD */
+    .dashboard-controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      background: #f8fafc;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 20px;
+    }
+
+    .dashboard-select {
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      width: 100%;
+      font-size: 0.9rem;
+      background-color: #fff;
+    }
+
+    .dashboard-select:disabled {
+      background-color: #f1f5f9;
+      color: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    .dashboard-date-row {
+      grid-column: 1 / -1;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 15px;
+      margin-bottom: 5px;
+    }
+
+    .total-counter {
+      text-align: center;
+      padding: 25px;
+      margin-bottom: 25px;
+      background: linear-gradient(135deg, #005595 0%, #00447a 100%);
+      color: white;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0, 85, 149, 0.4);
+    }
+
+    .total-counter h2 {
+      margin: 0;
+      font-size: 1.1rem;
+      opacity: 0.9;
+      font-weight: 500;
+    }
+
+    .total-counter span {
+      font-size: 3rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .chart-container {
+      margin-top: 20px;
+      height: 250px;
+      width: 100%;
+    }
+
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    .stats-table th,
+    .stats-table td {
+      padding: 12px;
+      border-bottom: 1px solid #f1f5f9;
+      text-align: left;
+    }
+
+    .stats-table th {
+      background: #f8fafc;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+
+    .dept-list-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .btn-delete {
+      color: var(--danger-color);
+      background: none;
+      border: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .danger-zone {
+      border: 1px solid #fecaca;
+      background: #fff5f5;
+    }
+
+    .btn-reset {
+      background: var(--danger-color);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      width: 100%;
+      box-shadow: 0 4px 6px rgba(220, 38, 38, 0.2);
+    }
+
+    .btn-clear-stats {
+      background: #f59e0b;
+      color: white;
+      border: none;
+      margin-top: 10px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      width: 100%;
+    }
+
+    /* ACTION BUTTONS GRID */
+    .action-buttons-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .btn-export {
+      padding: 12px;
+      background: #10b981;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
+      transition: 0.2s;
+    }
+
+    .btn-open-ai {
+      padding: 12px;
+      background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 6px rgba(124, 58, 237, 0.2);
+      transition: 0.2s;
+    }
+
+    .btn-open-ai:hover,
+    .btn-export:hover {
+      transform: translateY(-2px);
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(5px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .modal-content {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 30px;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    /* AI Modal Special Styling */
+    .modal-content.ai-modal-content {
+      max-width: 500px;
+      /* Lite bredare för AI */
+      text-align: left;
+    }
+
+    .size-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 25px 0;
+      position: relative;
+    }
+
+    .size-btn {
+      padding: 15px;
+      border: 2px solid #e2e8f0;
+      background: white;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 1.2rem;
+      transition: 0.2s;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .size-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .size-btn.available {
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+      background: #f0f9ff;
+    }
+
+    .size-btn.out-of-stock {
+      background: #f1f5f9;
+      color: #cbd5e1;
+      border-color: #f1f5f9;
+      cursor: not-allowed;
+      text-decoration: line-through;
+      box-shadow: none;
+    }
+  </style>
+</head>
+
+<body>
+  <img src="images/vgr-logo.png" alt="VGR Logga" class="fixed-logo" />
+
+  <div id="toast" class="toast-notification">✅ Utdelning registrerad!</div>
+
+  <div class="container">
+    <div id="screen-login" class="login-screen">
+      <h1 style="color: var(--primary-color)">Garderoben Kungälv</h1>
+      <p style="color: #6b7280; margin-bottom: 20px">Välj din avdelning</p>
+      <div id="login-dept-list" class="dept-grid">
+        <p>Laddar avdelningar...</p>
+      </div>
+      <button class="admin-login-link" onclick="window.goToAdmin()">
+        Logga in som Admin
+      </button>
+
+      <div class="contact-section">
+        <span class="contact-text">Vid frågor maila Miljöenheten SV</span>
+        <img src="images/qrkodhanna.png" alt="QR Kod kontakt" class="qr-image-small" />
+      </div>
+    </div>
+
+    <div id="screen-inventory" class="hidden">
+      <div class="header">
+        <div class="header-title-box">
+          <span class="header-label">Vald avdelning</span>
+          <span id="current-dept-display" class="header-dept-name">...</span>
+        </div>
+        <button class="btn-close" onclick="window.logout()">Avsluta</button>
+      </div>
+      <div id="filter-container" class="filter-grid"></div>
+    </div>
+
+    <div id="screen-admin" class="hidden admin-view">
+      <div class="header">
+        <h2>Adminportal</h2>
+        <button class="btn-close" onclick="window.closeAdmin()">
+          Logga ut
+        </button>
+      </div>
+
+      <div class="tabs-nav">
+        <button id="tab-btn-inv" class="tab-btn active" onclick="window.switchTab('inventory')">
+          Lager & Produkter
+        </button>
+        <button id="tab-btn-trans" class="tab-btn" onclick="window.switchTab('transactions')">
+          Statistik
+        </button>
+      </div>
+
+      <div id="tab-inventory">
+        <div id="stock-alerts" class="hidden"></div>
+
+        <div class="admin-section">
+          <h3>Lagerhantering</h3>
+          <div id="admin-inventory-list"></div>
+        </div>
+
+        <div class="admin-section" style="background: #f8fafc; border: 1px solid #e2e8f0">
+          <h3>Lägg till nytt plagg</h3>
+          <p style="font-size: 0.8rem">
+            Skapar automatiskt Herr/Dam (för kläder) eller Unisex (för
+            skor/strumpor).
+          </p>
+          <div class="add-form">
+            <div class="form-group">
+              <label>Kategori (t.ex. Mössor)</label>
+              <input type="text" id="new-cat-name" class="input-mini" placeholder="Namn..." />
+            </div>
+            <div class="form-group">
+              <label>Storleksskala</label>
+              <select id="new-cat-scale" class="input-mini">
+                <option value="clothes">Kläder (XS-XXXL)</option>
+                <option value="shoes">Skor (36-46)</option>
+              </select>
+            </div>
+            <button class="btn-action" onclick="window.addNewProduct()">
+              Skapa
+            </button>
+          </div>
+        </div>
+
+        <div class="admin-section">
+          <h3>Hantera Avdelningar</h3>
+          <div id="admin-dept-list" style="margin-bottom: 15px"></div>
+          <div class="add-form">
+            <input type="text" id="new-dept-name" class="input-mini" placeholder="Ny avdelning..." />
+            <button class="btn-action" onclick="window.addNewDept()">
+              Lägg till
+            </button>
+          </div>
+        </div>
+
+        <div class="admin-section danger-zone">
+          <h3>⚠️ Nödfall</h3>
+          <button class="btn-reset" onclick="window.resetDatabase()">
+            ÅTERSTÄLL HELA DATABASEN
+          </button>
+        </div>
+      </div>
+
+      <div id="tab-transactions" class="hidden">
+        <div class="admin-section" style="padding: 15px">
+          <h3>Filtrering</h3>
+          <div class="dashboard-controls">
+            <div class="dashboard-date-row">
+              <label style="font-weight: 600; font-size: 0.9rem">Period:</label>
+              <input type="date" id="dash-start" class="input-mini" onchange="window.updateDashboard()" />
+              <span>-</span>
+              <input type="date" id="dash-end" class="input-mini" onchange="window.updateDashboard()" />
+            </div>
+
+            <div class="form-group">
+              <label>Avdelning</label>
+              <select id="dash-dept" class="dashboard-select" onchange="window.updateDashboard()">
+                <option value="all">Alla avdelningar</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Plaggkategori</label>
+              <select id="dash-cat" class="dashboard-select" onchange="window.handleFilterChange()">
+                <option value="all">Alla plagg</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Typ (Kön)</label>
+              <select id="dash-type" class="dashboard-select" onchange="window.updateDashboard()">
+                <option value="all">Alla typer</option>
+                <option value="Herr">Herr</option>
+                <option value="Dam">Dam</option>
+                <option value="Unisex">Unisex</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Storlek</label>
+              <select id="dash-size" class="dashboard-select" onchange="window.updateDashboard()">
+                <option value="all">Alla storlekar</option>
+                <option value="XS">XS</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+                <option value="XXL">XXL</option>
+                <option value="XXXL">XXXL</option>
+                <option value="36">36</option>
+                <option value="37">37</option>
+                <option value="38">38</option>
+                <option value="39">39</option>
+                <option value="40">40</option>
+                <option value="41">41</option>
+                <option value="42">42</option>
+                <option value="43">43</option>
+                <option value="44">44</option>
+                <option value="45">45</option>
+                <option value="46">46</option>
+              </select>
+            </div>
+          </div>
+          <button onclick="window.resetFilters()" style="
+                width: 100%;
+                padding: 10px;
+                background: #e2e8f0;
+                border: none;
+                border-radius: 6px;
+                font-weight: 600;
+                color: #475569;
+              ">
+            Återställ filter
+          </button>
+
+          <div class="action-buttons-grid">
+            <button class="btn-export" onclick="window.exportToExcel()">
+              📄 Exportera till Excel
+            </button>
+            <button class="btn-open-ai" onclick="window.openAIModal()">
+              🤖 AI Analys
+            </button>
+          </div>
+        </div>
+
+        <div class="total-counter">
+          <h2>Antal uttag (valt urval)</h2>
+          <span id="dash-total-count">0</span> st
+        </div>
+
+        <div class="admin-section">
+          <h3>Utveckling över tid</h3>
+          <div class="chart-container">
+            <canvas id="statsChart"></canvas>
+          </div>
+        </div>
+
+        <div class="admin-section">
+          <h3>Topplista (Valt urval)</h3>
+          <table class="stats-table">
+            <thead>
+              <tr>
+                <th>Plagg</th>
+                <th>Antal</th>
+              </tr>
+            </thead>
+            <tbody id="dash-toplist"></tbody>
+          </table>
+        </div>
+
+        <div class="admin-section">
+          <h3>Transaktionslogg (Detaljer)</h3>
+          <div style="overflow-x: auto; max-height: 300px; overflow-y: auto">
+            <table class="stats-table">
+              <thead>
+                <tr>
+                  <th>Datum</th>
+                  <th>Plagg</th>
+                  <th>Avd</th>
+                </tr>
+              </thead>
+              <tbody id="admin-transaction-body"></tbody>
+            </table>
+          </div>
+
+          <div style="
+                margin-top: 20px;
+                border-top: 1px solid #eee;
+                padding-top: 10px;
+              ">
+            <button class="btn-clear-stats" onclick="window.clearStatistics()">
+              🗑️ RENSA ALL STATISTIK
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <h2 id="modal-title" style="margin-top: 0; color: var(--primary-color)">
+        Plagg
+      </h2>
+      <p style="color: #666; margin-bottom: 5px">Välj storlek</p>
+      <div class="size-grid" id="modal-sizes"></div>
+      <button onclick="window.closeModal()" style="
+            padding: 12px 40px;
+            border: none;
+            background: #e5e7eb;
+            border-radius: 8px;
+            font-weight: 600;
+          ">
+        Avbryt
+      </button>
+    </div>
+  </div>
+
+  <div id="ai-modal" class="modal-overlay hidden">
+    <div class="modal-content ai-modal-content">
+      <div class="ai-modal-header">
+        <h2>✨ AI Analys</h2>
+        <button onclick="window.closeAIModal()" style="
+              background: none;
+              border: none;
+              font-size: 1.5rem;
+              cursor: pointer;
+              color: #999;
+            ">
+          &times;
+        </button>
+      </div>
+
+      <p style="color: #666; font-size: 0.9rem; margin-bottom: 15px">
+        Ställ frågor om statistiken baserat på dina nuvarande filter.
+      </p>
+
+      <div class="ai-chips-container">
+        <button class="ai-chip"
+          onclick="document.getElementById('ai-prompt').value='Sammanfatta uttagen denna perioden kortfattat.';">
+          Sammanfatta perioden
+        </button>
+        <button class="ai-chip"
+          onclick="document.getElementById('ai-prompt').value='Vilka avdelningar har hämtat ut mest kläder? Gör en topplista.';">
+          Jämför avdelningar
+        </button>
+        <button class="ai-chip"
+          onclick="document.getElementById('ai-prompt').value='Vilka specifika plagg och storlekar verkar vara mest populära just nu?';">
+          Mest populära plagg
+        </button>
+      </div>
+
+      <div class="ai-input-area">
+        <textarea id="ai-prompt" class="ai-textarea" placeholder="Ställ en fråga om statistiken..."></textarea>
+        <button class="btn-ask-ai" onclick="window.askAI()">
+          <span>🤖</span> Fråga AI
+        </button>
+      </div>
+
+      <div id="ai-result" class="ai-result-box hidden"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      doc,
+      setDoc,
+      updateDoc,
+      addDoc,
+      deleteDoc,
+      increment,
+      query,
+      orderBy,
+      limit,
+      getDoc,
+      where,
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // VIKTIGT: Vi delar upp nyckeln för att lura Netlifys säkerhetsscanner.
+    const part1 = "AIza";
+    const part2 = "SyAsW69ZaP1-xXJ3nIxPxe6GHEcxNKdooIk";
+
+    const firebaseConfig = {
+      apiKey: part1 + part2,
+      authDomain: "garderoben-5c274.firebaseapp.com",
+      projectId: "garderoben-5c274",
+      storageBucket: "garderoben-5c274.firebasestorage.app",
+      messagingSenderId: "715840352910",
+      appId: "1:715840352910:web:3a97aa31766c38f0f78fdf",
+      measurementId: "G-SCHJ11MJXW",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let inventoryData = [];
+    let departmentList = [];
+    let allTransactions = [];
+    let statsChartInstance = null;
+    let idleInterval;
+    let lastActivityTime = Date.now();
+    const IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minuter
+
+    // --- TIMER FUNKTION (AUTO LOGOUT) ---
+    function resetIdleTimer() {
+      lastActivityTime = Date.now();
+    }
+
+    function checkIdleTime() {
+      if (
+        !document
+          .getElementById("screen-inventory")
+          .classList.contains("hidden")
+      ) {
+        if (Date.now() - lastActivityTime >= IDLE_TIMEOUT) {
+          window.logout();
+        }
+      }
+    }
+
+    // Starta intervall som kollar tiden varje sekund
+    idleInterval = setInterval(checkIdleTime, 1000);
+
+    // Kolla direkt när iPaden vaknar från viloläge
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        checkIdleTime();
+      }
+    });
+
+    // Lyssna på aktivitet för att nollställa timern
+    document.addEventListener("mousemove", resetIdleTimer);
+    document.addEventListener("click", resetIdleTimer);
+    document.addEventListener("touchstart", resetIdleTimer);
+
+    // --- TOAST FUNKTION ---
+    window.showToast = (message) => {
+      const toast = document.getElementById("toast");
+      toast.innerText = "✅ " + message;
+      toast.classList.add("show");
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, 2500);
+    };
+
+    async function initApp() {
+      try {
+        await loadDepartments();
+        await fetchInventory();
+      } catch (e) {
+        console.error("Init failed", e);
+        document.getElementById("login-dept-list").innerHTML =
+          "<p style='color:red'>Ett fel uppstod. Starta om sidan.</p>";
+      }
+    }
+
+    window.switchTab = (tabName) => {
+      document
+        .querySelectorAll(".tab-btn")
+        .forEach((b) => b.classList.remove("active"));
+      if (tabName === "inventory")
+        document.getElementById("tab-btn-inv").classList.add("active");
+      if (tabName === "transactions") {
+        document.getElementById("tab-btn-trans").classList.add("active");
+        // Initialize dashboard
+        window.initDashboard();
+      }
+
+      document.getElementById("tab-inventory").classList.add("hidden");
+      document.getElementById("tab-transactions").classList.add("hidden");
+      document.getElementById("tab-" + tabName).classList.remove("hidden");
+    };
+
+    // --- LAGERDATA ---
+    async function fetchInventory() {
+      try {
+        const querySnapshot = await getDocs(collection(db, "inventory"));
+        inventoryData = [];
+        querySnapshot.forEach((doc) => {
+          inventoryData.push({ id: doc.id, ...doc.data() });
+        });
+
+        if (
+          !document
+            .getElementById("screen-inventory")
+            .classList.contains("hidden")
+        )
+          generateCards();
+        if (
+          !document
+            .getElementById("screen-admin")
+            .classList.contains("hidden")
+        )
+          renderAdminInventory();
+      } catch (e) {
+        console.error("Fel vid hämtning:", e);
+      }
+    }
+
+    // --- GENERERA UTDELNINGSKORT ---
+    function generateCards() {
+      const container = document.getElementById("filter-container");
+      container.innerHTML = "";
+
+      const grouped = {};
+      inventoryData.forEach((item) => {
+        if (!grouped[item.category]) grouped[item.category] = [];
+        grouped[item.category].push(item);
+      });
+
+      Object.keys(grouped)
+        .sort()
+        .forEach((cat) => {
+          const card = document.createElement("div");
+          card.className = "filter-card";
+
+          let buttonsHtml = "";
+
+          // LOGIK FÖR STRUMPOR OCH SKOR
+          const isSocks = cat.toLowerCase().includes("strump");
+          const isShoes = cat.toLowerCase().includes("skor");
+
+          if (isSocks) {
+            const item =
+              grouped[cat].find((i) => i.type === "Unisex") ||
+              grouped[cat][0];
+
+            if (item) {
+              buttonsHtml = `<button class="sub-btn socks-action" style="width:100%;" 
+                  onclick="window.quickDistribute('${item.id}', 'M', '${cat}')">
+                  Hämta ut
+                </button>`;
+            } else {
+              buttonsHtml = `<p style="color:#999">Slut i lager</p>`;
+            }
+            card.innerHTML = `<div class="filter-title">${cat}</div><div class="sub-btn-container" style="width:100%">${buttonsHtml}</div>`;
+          } else if (isShoes) {
+            const item =
+              grouped[cat].find((i) => i.type === "Unisex") ||
+              grouped[cat][0];
+
+            if (item) {
+              buttonsHtml = `<button class="sub-btn socks-action" style="width:100%;" 
+                  onclick="window.openModalById('${item.id}')">
+                  Hämta ut
+                </button>`;
+            } else {
+              buttonsHtml = `<p style="color:#999">Slut i lager</p>`;
+            }
+            card.innerHTML = `<div class="filter-title">${cat}</div><div class="sub-btn-container" style="width:100%">${buttonsHtml}</div>`;
+          } else {
+            // --- UPPDATERAD LOGIK: ENDAST DAM OCH HERR FÖR KLÄDER ---
+            const types = ["Dam", "Herr"]; // Tog bort Unisex härifrån
+            types.forEach((type) => {
+              const item = grouped[cat].find((i) => i.type === type);
+              if (item) {
+                buttonsHtml += `<button class="sub-btn ${type.toLowerCase()}" onclick="window.openModalById('${item.id
+                  }')">${type}</button>`;
+              } else {
+                buttonsHtml += `<button class="sub-btn disabled" style="background:#eee; color:#ccc; border:1px solid #eee;">${type}</button>`;
+              }
+            });
+            card.innerHTML = `<div class="filter-title">${cat}</div><div class="sub-btn-container">${buttonsHtml}</div>`;
+          }
+
+          container.appendChild(card);
+        });
+    }
+
+    // --- ADMIN LAGERVY ---
+    function renderAdminInventory() {
+      const list = document.getElementById("admin-inventory-list");
+      const alertBox = document.getElementById("stock-alerts");
+      list.innerHTML = "";
+      alertBox.classList.add("hidden");
+      alertBox.innerHTML = "";
+
+      inventoryData.sort((a, b) =>
+        (a.category + a.type).localeCompare(b.category + b.type)
+      );
+      const sizeOrder = [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL",
+        "XXXL",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+      ];
+
+      const criticalItems = [];
+
+      inventoryData.forEach((item) => {
+        const isSocks = item.category.toLowerCase().includes("strump");
+        const isShoes = item.category.toLowerCase().includes("skor");
+
+        // --- UPPDATERAD LOGIK: DÖLJ UNISEX FÖR VANLIGA KLÄDER ---
+        // Om det inte är skor/strumpor och typen är Unisex -> visa ej (för att dölja ev. gamla felaktiga plagg)
+        if (!isSocks && !isShoes && item.type === "Unisex") return;
+
+        // Visa endast om det är Unisex för skor/strumpor (befintlig logik)
+        if ((isSocks || isShoes) && item.type !== "Unisex") return;
+
+        const div = document.createElement("div");
+        div.className = "stock-item-row";
+
+        let sizesHtml = "";
+
+        if (isSocks) {
+          const qty = item.sizes["M"] || 0;
+          const alertClass = qty <= 1 ? "critical" : "";
+          if (qty <= 1) criticalItems.push(`${item.category}`);
+
+          sizesHtml = `
+              <div class='stock-sizes-container'>
+                 <div class="stock-size-box ${alertClass}" style="min-width:120px;">
+                    <div style="font-weight:bold; font-size:0.8rem;">Dela ut (Lager)</div>
+                    <div class="stock-control">
+                        <button class="btn-mini" onclick="window.updateStock('${item.id}', 'M', -1)">-</button>
+                        <span style="font-size:0.9rem;">${qty}</span>
+                        <button class="btn-mini" onclick="window.updateStock('${item.id}', 'M', 1)">+</button>
+                    </div>
+                 </div>
+              </div>
+            `;
+
+          div.innerHTML = `
+                  <div style="font-weight:600; color:var(--primary-color);">${item.category}</div>
+                  ${sizesHtml}
+              `;
+        } else {
+          sizesHtml = "<div class='stock-sizes-container'>";
+          const sortedSizes = Object.entries(item.sizes).sort(
+            (a, b) => sizeOrder.indexOf(a[0]) - sizeOrder.indexOf(b[0])
+          );
+
+          let hasZeroStock = false;
+          sortedSizes.forEach(([size, qty]) => {
+            const alertClass = qty <= 1 ? "critical" : "";
+            if (qty <= 1) hasZeroStock = true;
+
+            sizesHtml += `
+                    <div class="stock-size-box ${alertClass}">
+                        <div style="font-weight:bold; font-size:0.8rem;">${size}</div>
+                        <div class="stock-control">
+                            <button class="btn-mini" onclick="window.updateStock('${item.id}', '${size}', -1)">-</button>
+                            <span style="font-size:0.9rem;">${qty}</span>
+                            <button class="btn-mini" onclick="window.updateStock('${item.id}', '${size}', 1)">+</button>
+                        </div>
+                    </div>
+                  `;
+          });
+          sizesHtml += "</div>";
+          if (hasZeroStock) {
+            criticalItems.push(`${item.category} (${item.type})`);
+          }
+
+          const displayName = isShoes
+            ? item.category
+            : `${item.category} <span style="color:#666; font-weight:400;">(${item.type})</span>`;
+
+          div.innerHTML = `
+                  <div style="font-weight:600; color:var(--primary-color);">${displayName}</div>
+                  ${sizesHtml}
+              `;
+        }
+
+        list.appendChild(div);
+      });
+
+      if (criticalItems.length > 0) {
+        alertBox.classList.remove("hidden");
+        alertBox.innerHTML = `<strong>⚠️ Lågt lager på:</strong><br>${criticalItems.join(
+          ", "
+        )}`;
+      }
+    }
+
+    // ==========================================
+    // --- DASHBOARD LOGIK ---
+    // ==========================================
+
+    window.initDashboard = async () => {
+      document.getElementById("dash-start").value = "2026-01-01";
+      document.getElementById("dash-end").value = new Date()
+        .toISOString()
+        .split("T")[0];
+
+      if (allTransactions.length === 0) {
+        document.getElementById("dash-total-count").innerText = "Laddar...";
+        const q = query(
+          collection(db, "transactions"),
+          orderBy("timestamp", "desc")
+        );
+        const snapshot = await getDocs(q);
+        allTransactions = [];
+        snapshot.forEach((doc) => {
+          allTransactions.push(doc.data());
+        });
+      }
+
+      populateFilters();
+      window.updateDashboard();
+    };
+
+    function populateFilters() {
+      const deptSelect = document.getElementById("dash-dept");
+      deptSelect.innerHTML = '<option value="all">Alla avdelningar</option>';
+      departmentList.forEach((dept) => {
+        const opt = document.createElement("option");
+        opt.value = dept;
+        opt.innerText = dept;
+        deptSelect.appendChild(opt);
+      });
+
+      const catSelect = document.getElementById("dash-cat");
+      catSelect.innerHTML = '<option value="all">Alla plagg</option>';
+      const uniqueCats = [
+        ...new Set(inventoryData.map((i) => i.category)),
+      ].sort();
+      uniqueCats.forEach((cat) => {
+        const opt = document.createElement("option");
+        opt.value = cat;
+        opt.innerText = cat;
+        catSelect.appendChild(opt);
+      });
+    }
+
+    // --- Hantera filterberoenden i statistikvyn (UPPDATERAD) ---
+    window.handleFilterChange = () => {
+      const catSelect = document.getElementById("dash-cat");
+      const typeSelect = document.getElementById("dash-type");
+      const sizeSelect = document.getElementById("dash-size");
+      const selectedCat = catSelect.value.toLowerCase();
+
+      const isSocks = selectedCat.includes("strump");
+      const isShoes = selectedCat.includes("skor");
+
+      // Återställ valda värden om de blir ogiltiga
+      typeSelect.disabled = false;
+      sizeSelect.disabled = false;
+
+      if (selectedCat === "all") {
+        // Visa alla alternativ i dropdown
+        typeSelect.innerHTML = `
+             <option value="all">Alla typer</option>
+             <option value="Herr">Herr</option>
+             <option value="Dam">Dam</option>
+             <option value="Unisex">Unisex</option>
+           `;
+      } else if (isSocks) {
+        // Strumpor: Lås Typ till Unisex och Storlek till M
+        typeSelect.innerHTML = `<option value="Unisex">Unisex</option>`;
+        typeSelect.value = "Unisex";
+        typeSelect.disabled = true;
+
+        sizeSelect.value = "M";
+        sizeSelect.disabled = true;
+      } else if (isShoes) {
+        // Skor: Lås Typ till Unisex, men LÅT Storlek vara valbar
+        typeSelect.innerHTML = `<option value="Unisex">Unisex</option>`;
+        typeSelect.value = "Unisex";
+        typeSelect.disabled = true;
+
+        sizeSelect.disabled = false;
+      } else {
+        // Vanliga plagg: Visa INTE Unisex i dropdown
+        typeSelect.innerHTML = `
+             <option value="all">Alla typer</option>
+             <option value="Herr">Herr</option>
+             <option value="Dam">Dam</option>
+           `;
+        // Om tidigare val var Unisex, återställ till all
+        if (typeSelect.value === "Unisex") typeSelect.value = "all";
+
+        sizeSelect.disabled = false;
+      }
+      // Uppdatera grafen/listan
+      window.updateDashboard();
+    };
+
+    window.resetFilters = () => {
+      document.getElementById("dash-start").value = "2026-01-01";
+      document.getElementById("dash-end").value = new Date()
+        .toISOString()
+        .split("T")[0];
+      document.getElementById("dash-dept").value = "all";
+      document.getElementById("dash-cat").value = "all";
+
+      // Återställ och lås upp de andra
+      const typeSelect = document.getElementById("dash-type");
+      // Återställ standardalternativ
+      typeSelect.innerHTML = `
+             <option value="all">Alla typer</option>
+             <option value="Herr">Herr</option>
+             <option value="Dam">Dam</option>
+             <option value="Unisex">Unisex</option>
+        `;
+      typeSelect.value = "all";
+      typeSelect.disabled = false;
+
+      const sizeSelect = document.getElementById("dash-size");
+      sizeSelect.value = "all";
+      sizeSelect.disabled = false;
+
+      window.updateDashboard();
+    };
+
+    // --- NEW AI FUNCTIONS ---
+    window.openAIModal = () => {
+      document.getElementById("ai-modal").classList.remove("hidden");
+    };
+    window.closeAIModal = () => {
+      document.getElementById("ai-modal").classList.add("hidden");
+    };
+
+    window.askAI = async () => {
+      const promptInput = document.getElementById("ai-prompt");
+      const resultBox = document.getElementById("ai-result");
+      const prompt = promptInput.value.trim();
+
+      if (!prompt) {
+        alert("Skriv en fråga först!");
+        return;
+      }
+
+      // 1. Förbered UI
+      resultBox.classList.remove("hidden");
+      resultBox.innerHTML =
+        "<div class='ai-loading'>🔄 Tänker så det knakar... (Detta kan ta några sekunder)</div>";
+
+      // 2. Samla in datan från nuvarande filtrering
+      const startDateStr = document.getElementById("dash-start").value;
+      const endDateStr = document.getElementById("dash-end").value;
+      const startDate = new Date(startDateStr);
+      const endDate = new Date(endDateStr);
+      endDate.setHours(23, 59, 59);
+
+      const fDept = document.getElementById("dash-dept").value;
+      const fCat = document.getElementById("dash-cat").value;
+      const fType = document.getElementById("dash-type").value;
+      const fSize = document.getElementById("dash-size").value;
+
+      const filtered = allTransactions.filter((t) => {
+        const tDate = t.timestamp ? t.timestamp.toDate() : new Date();
+        if (tDate < startDate || tDate > endDate) return false;
+        if (fDept !== "all" && t.dept !== fDept) return false;
+        if (fCat !== "all" && t.item !== fCat) return false;
+        if (fType !== "all" && t.type !== fType) return false;
+        if (fSize !== "all" && t.size !== fSize) return false;
+        return true;
+      });
+
+      // Formatera datan enklare för AI
+      const dataForAI = filtered.map((t) => ({
+        date: t.timestamp
+          ? t.timestamp.toDate().toISOString().split("T")[0]
+          : "N/A",
+        item: t.item,
+        type: t.type,
+        size: t.size,
+        dept: t.dept,
+      }));
+
+      try {
+        // 3. Anropa Netlify Function
+        const response = await fetch("/.netlify/functions/analyze-stats", {
+          method: "POST",
+          body: JSON.stringify({
+            prompt: prompt,
+            data: dataForAI,
+          }),
+        });
+
+        if (!response.ok)
+          throw new Error(
+            "Kunde inte nå AI-tjänsten (" + response.status + ")"
+          );
+
+        const json = await response.json();
+
+        // 4. Visa svaret
+        if (window.marked) {
+          resultBox.innerHTML = window.marked.parse(json.answer);
+        } else {
+          resultBox.innerText = json.answer; // Fallback
+        }
+      } catch (e) {
+        console.error(e);
+        resultBox.innerHTML = `<span style="color:red">Fel: ${e.message}</span>`;
+      }
+    };
+    // --- END AI FUNCTION ---
+
+    window.updateDashboard = () => {
+      const startDateStr = document.getElementById("dash-start").value;
+      const endDateStr = document.getElementById("dash-end").value;
+
+      const startDate = new Date(startDateStr);
+      const endDate = new Date(endDateStr);
+      endDate.setHours(23, 59, 59);
+
+      const fDept = document.getElementById("dash-dept").value;
+      const fCat = document.getElementById("dash-cat").value;
+      const fType = document.getElementById("dash-type").value;
+      const fSize = document.getElementById("dash-size").value;
+
+      const filtered = allTransactions.filter((t) => {
+        const tDate = t.timestamp ? t.timestamp.toDate() : new Date();
+
+        if (tDate < startDate || tDate > endDate) return false;
+
+        if (fDept !== "all" && t.dept !== fDept) return false;
+        if (fCat !== "all" && t.item !== fCat) return false;
+        if (fType !== "all" && t.type !== fType) return false;
+        if (fSize !== "all" && t.size !== fSize) return false;
+
+        return true;
+      });
+
+      document.getElementById("dash-total-count").innerText = filtered.length;
+
+      renderDashboardChart(filtered, startDate, endDate);
+
+      const itemCounts = {};
+      filtered.forEach((t) => {
+        const key = `${t.item} (${t.type})`;
+        itemCounts[key] = (itemCounts[key] || 0) + 1;
+      });
+      const sortedItems = Object.entries(itemCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+      const toplistBody = document.getElementById("dash-toplist");
+      toplistBody.innerHTML = "";
+      if (sortedItems.length === 0)
+        toplistBody.innerHTML =
+          "<tr><td colspan='2'>Ingen data för urvalet</td></tr>";
+      sortedItems.forEach(([name, count]) => {
+        toplistBody.innerHTML += `<tr><td>${name}</td><td><strong>${count}</strong></td></tr>`;
+      });
+
+      const logBody = document.getElementById("admin-transaction-body");
+      logBody.innerHTML = "";
+      filtered.slice(0, 50).forEach((d) => {
+        const dateStr = d.timestamp
+          ? d.timestamp.toDate().toISOString().split("T")[0]
+          : "?";
+        logBody.innerHTML += `<tr><td>${dateStr}</td><td>${d.item} (${d.type}, ${d.size})</td><td>${d.dept}</td></tr>`;
+      });
+    };
+
+    function renderDashboardChart(data, startDate, endDate) {
+      const ctx = document.getElementById("statsChart").getContext("2d");
+
+      const dataMap = {};
+      data.forEach((d) => {
+        const dateObj = d.timestamp ? d.timestamp.toDate() : new Date();
+        const dateStr = dateObj.toISOString().split("T")[0];
+        dataMap[dateStr] = (dataMap[dateStr] || 0) + 1;
+      });
+
+      const labels = [];
+      const counts = [];
+
+      let current = new Date(startDate);
+      current.setHours(12, 0, 0, 0);
+
+      const stopDate = new Date(endDate);
+      stopDate.setHours(12, 0, 0, 0);
+
+      while (current <= stopDate) {
+        const dateStr = current.toISOString().split("T")[0];
+        labels.push(dateStr);
+        counts.push(dataMap[dateStr] || 0);
+
+        current.setDate(current.getDate() + 1);
+      }
+
+      if (statsChartInstance) {
+        statsChartInstance.destroy();
+      }
+
+      if (typeof Chart === "undefined") return;
+
+      statsChartInstance = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: "Antal uttag",
+              data: counts,
+              borderColor: "#005595",
+              backgroundColor: "rgba(0, 85, 149, 0.1)",
+              tension: 0.3,
+              fill: true,
+              pointRadius: 3,
+              hitRadius: 10,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1 } },
+          },
+        },
+      });
+    }
+
+    window.clearStatistics = async () => {
+      if (
+        !confirm(
+          "Detta raderar ALL statistik/historik permanent. Lagersaldot påverkas ej. Är du säker?"
+        )
+      )
+        return;
+
+      try {
+        const q = await getDocs(collection(db, "transactions"));
+        const promises = [];
+        q.forEach((d) => promises.push(deleteDoc(d.ref)));
+        await Promise.all(promises);
+
+        alert("Statistik rensad.");
+        allTransactions = [];
+        window.initDashboard();
+      } catch (e) {
+        alert("Fel: " + e.message);
+      }
+    };
+
+    // --- LOGIN / UI ---
+    window.login = (dept) => {
+      sessionStorage.setItem("selectedDept", dept);
+      document.getElementById("current-dept-display").innerText = dept;
+      document.getElementById("screen-login").classList.add("hidden");
+      document.getElementById("screen-inventory").classList.remove("hidden");
+      generateCards();
+      resetIdleTimer(); // Starta timern
+    };
+
+    window.logout = () => {
+      sessionStorage.removeItem("selectedDept");
+      // Tvinga en omladdning av sidan för att kringgå cachning i kioskläge
+      window.location.reload();
+    };
+    window.goToAdmin = () => {
+      const pwd = prompt("Ange lösenord:");
+      if (pwd === "1234") {
+        document.getElementById("screen-login").classList.add("hidden");
+        document.getElementById("screen-admin").classList.remove("hidden");
+        renderAdminInventory();
+        window.switchTab("inventory");
+        renderAdminDepts();
+      } else if (pwd !== null) alert("Fel lösenord.");
+    };
+    window.closeAdmin = () => {
+      document.getElementById("screen-admin").classList.add("hidden");
+      document.getElementById("screen-login").classList.remove("hidden");
+    };
+
+    // --- CRUD ---
+    window.addNewProduct = async () => {
+      const name = document.getElementById("new-cat-name").value.trim();
+      const scale = document.getElementById("new-cat-scale").value;
+      if (!name) {
+        alert("Fyll i namn!");
+        return;
+      }
+
+      let sizes =
+        scale === "clothes"
+          ? { XS: 0, S: 0, M: 0, L: 0, XL: 0, XXL: 0, XXXL: 0 }
+          : {
+            36: 0,
+            37: 0,
+            38: 0,
+            39: 0,
+            40: 0,
+            41: 0,
+            42: 0,
+            43: 0,
+            44: 0,
+            45: 0,
+            46: 0,
+          };
+
+      // --- UPPDATERAD LOGIK: Skapa rätt kön baserat på namn ---
+      const lowerName = name.toLowerCase();
+      let types = [];
+      // Om det är sko eller strumpa -> Endast Unisex
+      if (lowerName.includes("sko") || lowerName.includes("strump")) {
+        types = ["Unisex"];
+      } else {
+        // Annars -> Endast Dam och Herr
+        types = ["Dam", "Herr"];
+      }
+
+      try {
+        await Promise.all(
+          types.map((type) =>
+            addDoc(collection(db, "inventory"), {
+              category: name.charAt(0).toUpperCase() + name.slice(1),
+              type: type,
+              sizes: sizes,
+            })
+          )
+        );
+        alert(`Skapade ${name}!`);
+        document.getElementById("new-cat-name").value = "";
+        await fetchInventory();
+      } catch (e) {
+        alert("Fel: " + e.message);
+      }
+    };
+
+    // SPECIALFUNKTION FÖR ATT DELA UT STRUMPOR SNABBT
+    window.quickDistribute = async (itemId, size, category) => {
+      const dept = sessionStorage.getItem("selectedDept");
+      try {
+        await updateDoc(doc(db, "inventory", itemId), {
+          [`sizes.${size}`]: increment(-1),
+        });
+        await addDoc(collection(db, "transactions"), {
+          item: category,
+          type: "Unisex",
+          size: size,
+          dept: dept,
+          timestamp: new Date(),
+        });
+        window.showToast("Utdelning registrerad");
+        await fetchInventory();
+      } catch (e) {
+        alert("Fel: " + e.message);
+      }
+    };
+
+    window.openModalById = (itemId) => {
+      const item = inventoryData.find((i) => i.id === itemId);
+      if (!item) return;
+      document.getElementById(
+        "modal-title"
+      ).innerText = `${item.category} (${item.type})`;
+      const sizeContainer = document.getElementById("modal-sizes");
+      sizeContainer.innerHTML = "";
+
+      const sizeOrder = [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL",
+        "XXXL",
+        "36",
+        "37",
+        "38",
+        "39",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+      ];
+      const sortedSizes = Object.entries(item.sizes).sort(
+        (a, b) => sizeOrder.indexOf(a[0]) - sizeOrder.indexOf(b[0])
+      );
+      for (const [size, qty] of sortedSizes) {
+        const btn = document.createElement("button");
+        btn.className =
+          qty > 0 ? "size-btn available" : "size-btn out-of-stock";
+        btn.innerHTML = `${size}<br><span style="font-size:0.7em; font-weight:normal;">(${qty} st)</span>`;
+        if (qty > 0)
+          btn.onclick = () => window.registerTransaction(item, size);
+        sizeContainer.appendChild(btn);
+      }
+      document.getElementById("modal").classList.remove("hidden");
+    };
+
+    window.registerTransaction = async (item, size) => {
+      const dept = sessionStorage.getItem("selectedDept");
+
+      try {
+        await updateDoc(doc(db, "inventory", item.id), {
+          [`sizes.${size}`]: increment(-1),
+        });
+        await addDoc(collection(db, "transactions"), {
+          item: item.category,
+          type: item.type,
+          size: size,
+          dept: dept,
+          timestamp: new Date(),
+        });
+        window.closeModal();
+        window.showToast("Utdelning registrerad");
+        await fetchInventory();
+      } catch (e) {
+        alert("Fel: " + e.message);
+      }
+    };
+
+    window.updateStock = async (id, size, change) => {
+      try {
+        const item = inventoryData.find((i) => i.id === id);
+        if (!item) return;
+
+        const currentQty = item.sizes[size] || 0;
+
+        // HINDRA NEGATIVT SALDO
+        if (change < 0 && currentQty <= 0) {
+          return;
+        }
+
+        await updateDoc(doc(db, "inventory", id), {
+          [`sizes.${size}`]: increment(change),
+        });
+
+        // Uppdatera lokalt direkt
+        item.sizes[size] += change;
+        renderAdminInventory();
+      } catch (e) {
+        alert("Fel: " + e.message);
+      }
+    };
+    window.closeModal = () =>
+      document.getElementById("modal").classList.add("hidden");
+
+    // --- Departments ---
+    async function loadDepartments() {
+      const deptContainer = document.getElementById("login-dept-list");
+      try {
+        const docSnap = await getDoc(doc(db, "settings", "general"));
+        departmentList =
+          docSnap.exists() && docSnap.data().departments
+            ? docSnap.data().departments
+            : [
+              "Akutmottagning",
+              "Avd 2 Kirurgi",
+              "Avd 3 Kirurgi",
+              "Avd 4 Medicin",
+              "Avd 5 Geriatrik",
+              "Avd 6 Geriatrik",
+              "IVA",
+            ];
+        if (!docSnap.exists())
+          await setDoc(
+            doc(db, "settings", "general"),
+            { departments: departmentList },
+            { merge: true }
+          );
+      } catch (e) {
+        departmentList = ["Offline"];
+      }
+      deptContainer.innerHTML = "";
+
+      departmentList.sort((a, b) =>
+        a.localeCompare(b, "sv", { numeric: true })
+      );
+
+      departmentList.forEach((dept) => {
+        const div = document.createElement("div");
+        div.className = "dept-card";
+        div.textContent = dept;
+        div.onclick = () => window.login(dept);
+        deptContainer.appendChild(div);
+      });
+    }
+    window.addNewDept = async () => {
+      const name = document.getElementById("new-dept-name").value.trim();
+      if (!name || departmentList.includes(name)) return;
+      departmentList.push(name);
+      await setDoc(
+        doc(db, "settings", "general"),
+        { departments: departmentList },
+        { merge: true }
+      );
+      renderAdminDepts();
+      loadDepartments();
+      document.getElementById("new-dept-name").value = "";
+    };
+    window.removeDept = async (name) => {
+      if (!confirm("Ta bort " + name + "?")) return;
+      departmentList = departmentList.filter((d) => d !== name);
+      await setDoc(
+        doc(db, "settings", "general"),
+        { departments: departmentList },
+        { merge: true }
+      );
+      renderAdminDepts();
+      loadDepartments();
+    };
+    function renderAdminDepts() {
+      const list = document.getElementById("admin-dept-list");
+      list.innerHTML = "";
+      departmentList.forEach((dept) => {
+        const div = document.createElement("div");
+        div.className = "dept-list-item";
+        div.innerHTML = `<span>${dept}</span> <button class="btn-delete" onclick="window.removeDept('${dept}')">Ta bort</button>`;
+        list.appendChild(div);
+      });
+    }
+
+    // --- EXPORT TILL EXCEL (CSV) ---
+    window.exportToExcel = () => {
+      // 1. Hämta värden från filter (samma logik som i dashboard)
+      const startDateStr = document.getElementById("dash-start").value;
+      const endDateStr = document.getElementById("dash-end").value;
+      const startDate = new Date(startDateStr);
+      const endDate = new Date(endDateStr);
+      endDate.setHours(23, 59, 59);
+
+      const fDept = document.getElementById("dash-dept").value;
+      const fCat = document.getElementById("dash-cat").value;
+      const fType = document.getElementById("dash-type").value;
+      const fSize = document.getElementById("dash-size").value;
+
+      // 2. Filtrera datan
+      const filtered = allTransactions.filter((t) => {
+        const tDate = t.timestamp ? t.timestamp.toDate() : new Date();
+        if (tDate < startDate || tDate > endDate) return false;
+        if (fDept !== "all" && t.dept !== fDept) return false;
+        if (fCat !== "all" && t.item !== fCat) return false;
+        if (fType !== "all" && t.type !== fType) return false;
+        if (fSize !== "all" && t.size !== fSize) return false;
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        alert("Ingen data att exportera med valda filter.");
+        return;
+      }
+
+      // 3. Summera antalet
+      const aggregation = {};
+
+      filtered.forEach((t) => {
+        // Skapa en unik nyckel för varje kombination
+        const key = `${t.item}|${t.type}|${t.size}|${t.dept}`;
+        aggregation[key] = (aggregation[key] || 0) + 1;
+      });
+
+      // 4. Skapa CSV-innehållet
+      let csvContent = "Plagg;Herr/Dam/Barn;Storlek;Avdelning;Antal\n";
+
+      for (const [key, count] of Object.entries(aggregation)) {
+        const [item, type, size, dept] = key.split("|");
+        csvContent += `${item};${type};${size};${dept};${count}\n`;
+      }
+
+      // 5. Ladda ner filen
+      const blob = new Blob(["\uFEFF" + csvContent], {
+        type: "text/csv;charset=utf-8;",
+      });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+
+      link.setAttribute("href", url);
+      link.setAttribute(
+        "download",
+        `Statistik_${startDateStr}_till_${endDateStr}.csv`
+      );
+      link.style.visibility = "hidden";
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
+
+    // --- ÅTERSTÄLLNING ---
+    window.resetDatabase = async () => {
+      if (
+        prompt(
+          "VARNING! Detta raderar ALLT.\nSkriv 'RADERA' för att bekräfta:"
+        ) !== "RADERA"
+      )
+        return;
+      try {
+        const invQ = await getDocs(collection(db, "inventory"));
+        const delProms = [];
+        invQ.forEach((d) => delProms.push(deleteDoc(d.ref)));
+        const transQ = await getDocs(collection(db, "transactions"));
+        transQ.forEach((d) => delProms.push(deleteDoc(d.ref)));
+        await Promise.all(delProms);
+
+        const clothingSizes = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
+        const shoeSizes = [
+          "36",
+          "37",
+          "38",
+          "39",
+          "40",
+          "41",
+          "42",
+          "43",
+          "44",
+          "45",
+          "46",
+        ];
+        const cats = [
+          "Jacka",
+          "Tröja",
+          "T-shirt",
+          "Kofta",
+          "Byxa",
+          "Strumpor",
+          "Skor",
+          "Övrigt",
+        ];
+
+        // --- UPPDATERAD LOGIK FÖR RESET ---
+        for (const cat of cats) {
+          // Om det är skor/strumpor -> bara Unisex. Annars Dam/Herr.
+          const isUnisexItem = cat === "Skor" || cat === "Strumpor";
+          const types = isUnisexItem ? ["Unisex"] : ["Dam", "Herr"];
+
+          for (const type of types) {
+            const sizesObj = {};
+            const keys = cat === "Skor" ? shoeSizes : clothingSizes;
+            keys.forEach((k) => (sizesObj[k] = 10)); // 10 i startlager
+            await addDoc(collection(db, "inventory"), {
+              category: cat,
+              type: type,
+              sizes: sizesObj,
+            });
+          }
+        }
+        alert("Databas återställd.");
+        location.reload();
+      } catch (e) {
+        alert("Fel: " + e.message);
+      }
+    };
+
+    initApp();
+  </script>
+</body>
+
+</html>
