@@ -1,6 +1,6 @@
 // check-models.js
 // Byt ut mot din nyckel om du kör lokalt utan environment variables
-const apiKey = AIzaSyDtWgI1KgDc4vBR6DUJnCbk76zstFWCvp0 || "DIN_NYCKEL_HÄR";
+const apiKey = process.env.GEMINI_API_KEY;
 
 const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
 
