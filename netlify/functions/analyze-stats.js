@@ -70,7 +70,7 @@ export default async (req, context) => {
     `;
 
     // 4. Anropa Google Gemini API med timeout
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
     // Sätt en timeout på 25 sekunder (Netlify har 26s gräns)
     const controller = new AbortController();
