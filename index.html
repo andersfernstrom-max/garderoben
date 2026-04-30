@@ -1219,7 +1219,65 @@
     let statsChartInstance = null;
     let idleInterval;
     let lastActivityTime = Date.now();
-    const IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minuter
+    const IDLE_TIMEOUT = 30 * 1000; // 30 sekunder (kioskläge)
+    let modalAutoCloseTimer = null;
+    const MODAL_AUTO_CLOSE = 15 * 1000; // 15 sekunder
+
+    // --- AUTO-UPPDATERING (VERSION POLLING FÖR KIOSKLÄGE) ---
+    let currentAppVersion = null;
+    const VERSION_CHECK_INTERVAL = 5 * 60 * 1000; // Kolla var 5:e minut
+    const WEEKLY_RELOAD_MS = 7 * 24 * 60 * 60 * 1000; // 7 dagar
+
+    async function checkForUpdates() {
+      try {
+        const resp = await fetch('/version.json?t=' + Date.now(), { cache: 'no-store' });
+        if (!resp.ok) return;
+        const versionData = await resp.json();
+        if (currentAppVersion === null) {
+          // Första gången - spara nuvarande version
+          currentAppVersion = versionData.version;
+        } else if (versionData.version !== currentAppVersion) {
+          // Ny version finns - ladda om BARA om vi är på login-skärmen
+          const onLoginScreen = !document.getElementById('screen-login').classList.contains('hidden');
+          if (onLoginScreen) {
+            console.log('Ny version hittad, laddar om...');
+            localStorage.setItem('lastFullReload', Date.now().toString());
+            window.location.reload();
+          } else {
+            // Spara att vi behöver ladda om vid nästa logout
+            window._pendingReload = true;
+          }
+        }
+      } catch (e) {
+        // Ignorera nätverksfel (offline etc)
+      }
+    }
+
+    // Veckovis tvångs-omladdning (backup om version.json inte fångade ändringen)
+    function checkWeeklyReload() {
+      const lastReload = parseInt(localStorage.getItem('lastFullReload') || '0');
+      if (Date.now() - lastReload > WEEKLY_RELOAD_MS) {
+        const onLoginScreen = !document.getElementById('screen-login').classList.contains('hidden');
+        if (onLoginScreen) {
+          console.log('Veckovis omladdning...');
+          localStorage.setItem('lastFullReload', Date.now().toString());
+          window.location.href = window.location.pathname + '?v=' + Date.now();
+          return;
+        }
+      }
+    }
+
+    // Spara att sidan laddades (vid första besök)
+    if (!localStorage.getItem('lastFullReload')) {
+      localStorage.setItem('lastFullReload', Date.now().toString());
+    }
+
+    // Starta versionspolling + veckocheck
+    setInterval(() => {
+      checkForUpdates();
+      checkWeeklyReload();
+    }, VERSION_CHECK_INTERVAL);
+    checkForUpdates();
 
     // --- TIMER FUNKTION (AUTO LOGOUT) ---
     function resetIdleTimer() {
@@ -1227,6 +1285,7 @@
     }
 
     function checkIdleTime() {
+      // Kolla inventory-skärmen
       if (
         !document
           .getElementById("screen-inventory")
@@ -1234,6 +1293,13 @@
       ) {
         if (Date.now() - lastActivityTime >= IDLE_TIMEOUT) {
           window.logout();
+        }
+      }
+      // Stäng storleksmodal om den har stått öppen för länge
+      const modal = document.getElementById('modal');
+      if (!modal.classList.contains('hidden')) {
+        if (Date.now() - lastActivityTime >= MODAL_AUTO_CLOSE) {
+          window.closeModal();
         }
       }
     }
@@ -1245,6 +1311,7 @@
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible") {
         checkIdleTime();
+        checkForUpdates(); // Kolla uppdateringar direkt vid uppvakning
       }
     });
 
@@ -1703,22 +1770,32 @@
           }),
         });
 
-        if (!response.ok)
-          throw new Error(
-            "Kunde inte nå AI-tjänsten (" + response.status + ")"
-          );
+        if (!response.ok) {
+          // Försök läsa felmeddelande från servern
+          try {
+            const errorJson = await response.json();
+            throw new Error(errorJson.error || "Kunde inte nå AI-tjänsten (" + response.status + ")");
+          } catch (parseErr) {
+            if (parseErr.message && !parseErr.message.includes("JSON")) {
+              throw parseErr; // Det var vår error ovan
+            }
+            throw new Error("Kunde inte nå AI-tjänsten (" + response.status + ")");
+          }
+        }
 
         const json = await response.json();
 
         // 4. Visa svaret
-        if (window.marked) {
+        if (json.error) {
+          resultBox.innerHTML = `<span style="color:red">⚠️ ${json.error}</span>`;
+        } else if (window.marked) {
           resultBox.innerHTML = window.marked.parse(json.answer);
         } else {
           resultBox.innerText = json.answer; // Fallback
         }
       } catch (e) {
         console.error(e);
-        resultBox.innerHTML = `<span style="color:red">Fel: ${e.message}</span>`;
+        resultBox.innerHTML = `<span style="color:red">⚠️ ${e.message}</span>`;
       }
     };
     // --- END AI FUNCTION ---
@@ -1874,8 +1951,13 @@
 
     window.logout = () => {
       sessionStorage.removeItem("selectedDept");
-      // Tvinga en omladdning av sidan för att kringgå cachning i kioskläge
-      window.location.reload();
+      // Om det finns en väntande uppdatering, ladda om med cache-bust
+      if (window._pendingReload) {
+        window._pendingReload = false;
+        window.location.href = window.location.pathname + '?v=' + Date.now();
+      } else {
+        window.location.reload();
+      }
     };
     window.goToAdmin = () => {
       const pwd = prompt("Ange lösenord:");

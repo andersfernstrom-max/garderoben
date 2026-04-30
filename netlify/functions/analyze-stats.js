@@ -69,29 +69,67 @@ export default async (req, context) => {
       Om datan är tom, säg att det inte finns någon statistik att analysera för det valda urvalet.
     `;
 
-    // 4. Anropa Google Gemini API
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    // 4. Anropa Google Gemini API med timeout
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
-    const googleResponse = await fetch(apiUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [
+    // Sätt en timeout på 25 sekunder (Netlify har 26s gräns)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
+
+    let googleResponse;
+    try {
+      googleResponse = await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                { text: systemPrompt + "\n\nAnvändarens fråga: " + prompt },
+              ],
+            },
+          ],
+        }),
+      });
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      // Hantera timeout specifikt
+      if (fetchError.name === 'AbortError') {
+        return new Response(
+          JSON.stringify({
+            error: "AI-tjänsten svarade inte i tid. Försök igen.",
+          }),
           {
-            parts: [
-              { text: systemPrompt + "\n\nAnvändarens fråga: " + prompt },
-            ],
-          },
-        ],
-      }),
-    });
+            status: 504,
+            headers: {
+              "Content-Type": "application/json",
+              "Access-Control-Allow-Origin": "*",
+            },
+          }
+        );
+      }
+      throw fetchError;
+    }
+
+    clearTimeout(timeoutId);
 
     if (!googleResponse.ok) {
       const errorText = await googleResponse.text();
       console.error("Gemini API Error:", googleResponse.status, errorText);
+
+      let userMessage = `AI-tjänsten svarade med fel (${googleResponse.status}).`;
+      if (googleResponse.status === 429) {
+        userMessage = "AI-tjänsten är överbelastad just nu. Vänta en stund och försök igen.";
+      } else if (googleResponse.status === 403) {
+        userMessage = "API-nyckeln saknar behörighet. Kontakta administratören.";
+      } else if (googleResponse.status === 404) {
+        userMessage = "AI-modellen kunde inte hittas. Kontakta administratören.";
+      }
+
       return new Response(
         JSON.stringify({
-          error: `AI-tjänsten svarade med fel ${googleResponse.status}`,
+          error: userMessage,
           details: errorText,
         }),
         {
@@ -121,7 +159,7 @@ export default async (req, context) => {
     console.error("Serverfel:", error);
     return new Response(
       JSON.stringify({
-        error: "Tekniskt fel på servern.",
+        error: "Tekniskt fel på servern. Försök igen om en stund.",
         details: error.message,
       }),
       {
@@ -134,3 +172,4 @@ export default async (req, context) => {
     );
   }
 };
+
